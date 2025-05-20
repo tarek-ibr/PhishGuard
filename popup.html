@@ -1,71 +1,128 @@
 <!DOCTYPE html>
 <html>
 <head>
-<link href="https://fonts.googleapis.com/css2?family=Share+Tech&display=swap" rel="stylesheet">
-  <title>Phishing Guard </title>
+  <meta charset="UTF-8">
+  <title>Phishing Guard</title>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech&display=swap" rel="stylesheet">
+
   <style>
-    body {
+    html, body {
       width: 300px;
       height: 400px;
       margin: 0;
-      padding: 10px;
-      background-color: #393e46;
-      font-family: Arial, sans-serif;
-    }
-    h1 {
-      text-align: center;
-      font-size: 25px;
-      margin-bottom: 20px;
+      padding: 0;
       font-family: 'Share Tech', monospace;
     }
+
+    body {
+      background-image: url('img/background.gif');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    /* Overlay to enhance readability */
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      z-index: -1;
+    }
+
+    .container {
+      width: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    h1 {
+      font-size: 25px;
+      margin-bottom: 15px;
+      color: white;
+    }
+
     img {
-      display: block;
-      margin: auto;
       width: 100px;
       height: 120px;
       filter: drop-shadow(0 0 8px #00ffff);
+      margin-bottom: 15px;
     }
+
     form {
       display: flex;
       flex-direction: column;
-      justify-content: space-around;
-      height: 200px;
+      align-items: center;
+      width: 100%;
+      gap: 10px;
     }
+
     label {
       font-size: 16px;
-      margin-bottom: 10px;
+      color: white;
     }
+
     textarea {
+      width: 100%;
       height: 90px;
       resize: none;
       font-size: 16px;
       padding: 5px;
       border: 1px solid #ccc;
+      border-radius: 8px;
     }
+
     button {
       font-size: 16px;
-      padding: 10px;
+      padding: 10px 20px;
       background-color: #dc2f2f;
       color: white;
       border: none;
+      border-radius: 8px;
       cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.2s ease;
     }
+
+    button:hover {
+      background-color: #ff4d4d;
+      transform: scale(1.05);
+    }
+
+    button:active {
+      transform: scale(0.98);
+    }
+
     p {
-      text-align: center;
       font-size: 16px;
-      margin-top: 20px;
+      margin-top: 15px;
+      color: white;
     }
   </style>
 </head>
 <body>
-  <h1>Phishing Guard</h1>
-  <img src="img/photo.png" alt="Logo">
-  <form id="news-form">
-    <label for="news-text">Enter your URL:</label>
-    <textarea id="news-text" name="url" placeholder="https://example.com"></textarea>
-    <button id="submit-button">Predict</button>
-  </form>
-  <p id="prediction-result"></p>
+  <div class="container">
+    <h1>PhishGuard</h1>
+    <img src="img/photo.png" alt="Logo">
+    <form id="news-form">
+      <label for="news-text">Enter your URL:</label>
+      <textarea id="news-text" name="url" placeholder="https://example.com"></textarea>
+      <button id="submit-button">Predict</button>
+    </form>
+    <p id="prediction-result"></p>
+  </div>
   <script src="popup.js"></script>
 </body>
 </html>

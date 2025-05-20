@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pickle
 import pandas as pd
@@ -13,7 +13,10 @@ with open('model.pkl', 'rb') as f:
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return jsonify({
+        'status': 'online',
+        'message': 'PhishGuard API is running. Use /predict endpoint to check URLs.'
+    })
 
 @app.route('/predict', methods=['POST'])
 def predict():
