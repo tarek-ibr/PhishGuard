@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>PhishGuard Warning</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f8f8f8;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      height: 100vh;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      padding: 30px;
+      background-color: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      text-align: center;
+    }
+    .warning-icon {
+      width: 100px;
+      height: 100px;
+      margin-bottom: 20px;
+    }
+    h1 {
+      color: #d32f2f;
+      margin-bottom: 20px;
+    }
+    p {
+      font-size: 18px;
+      line-height: 1.6;
+      margin-bottom: 20px;
+      color: #333;
+    }
+    .buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 30px;
+    }
+    button {
+      padding: 12px 24px;
+      border: none;
+      border-radius: 5px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+    .back-btn {
+      background-color: #4caf50;
+      color: white;
+    }
+    .proceed-btn {
+      background-color: #d32f2f;
+      color: white;
+    }
+    button:hover {
+      opacity: 0.9;
+    }
+    .url-display {
+      background-color: #f1f1f1;
+      padding: 12px;
+      border-radius: 5px;
+      word-break: break-all;
+      margin: 20px 0;
+      font-family: monospace;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <img src="img/photo.png" alt="Warning" class="warning-icon">
+    <h1>⚠️ Phishing Alert! ⚠️</h1>
+    <p>PhishGuard has detected that this website may be a phishing attempt.</p>
+    <div class="url-display" id="suspicious-url"></div>
+    <p>This site might be trying to steal your personal information, login credentials, or financial details.</p>
+    <div class="buttons">
+      <button class="back-btn" id="go-back">Go Back (Safe)</button>
+      <button class="proceed-btn" id="proceed-anyway">Proceed Anyway (Risky)</button>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      // Get the destination URL from the query parameter
+      const urlParams = new URLSearchParams(window.location.search);
+      const destination = urlParams.get('destination');
+      
+      // Display the suspicious URL
+      document.getElementById('suspicious-url').textContent = destination || 'Unknown URL';
+      
+      // Set up button actions
+      document.getElementById('go-back').addEventListener('click', function() {
+        window.history.back();
+      });
+      
+      document.getElementById('proceed-anyway').addEventListener('click', function() {
+        window.location.href = destination;
+      });
+    });
+  </script>
+</body>
+</html> 

@@ -1,46 +1,67 @@
-chrome.webRequest.onBeforeRequest.addListener(
+chrome.webNavigation.onBeforeNavigate.addListener(
   async function(details) {
     const url = details.url;
-
-    const features = extractUrlFeatures(url);
-
-    const response = await fetch('http://localhost:5000/predict', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ features: features })
-    });
-
-    const data = await response.json();
-    const isPhishing = data.prediction === 1;
-
-    if (isPhishing) {
-      chrome.notifications.create({
-        type: 'basic',
-        iconUrl: 'img/icon128.jpg',
-        title: 'Phishing Detected!',
-        message: `Blocked access to: ${url}`
-      });
-      return { cancel: true };
+    
+    // Skip checking for local/internal URLs
+    if (url.startsWith('chrome://') || url.startsWith('chrome-extension://') || 
+        url.startsWith('localhost') || url.startsWith('127.0.0.1')) {
+      return;
     }
 
-    return { cancel: false };
+    try {
+      const response = await fetch('http://localhost:5000/predict', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ url: url })  // Send raw URL as expected by backend
+      });
+
+      if (!response.ok) {
+        console.error('Server error:', response.status);
+        return;
+      }
+
+      const data = await response.json();
+      const isPhishing = data.prediction === 1;
+
+      if (isPhishing) {
+        // Show warning and ask user if they want to proceed
+        chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+          const activeTab = tabs[0];
+          chrome.tabs.update(activeTab.id, {
+            url: chrome.runtime.getURL('warning.html') + '?destination=' + encodeURIComponent(url)
+          });
+        });
+      }
+    } catch (error) {
+      console.error('Error checking URL:', error);
+    }
   },
-  { urls: ["<all_urls>"] },
-  ["blocking"]
+  { url: [{schemes: ['http', 'https']}] }
 );
 
-// Feature extraction
-function extractUrlFeatures(url) {
-  const a = document.createElement('a');
-  a.href = url;
+// Listen for messages from popup.js or warning.html
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  if (message.action === "checkUrl") {
+    fetchPrediction(message.url)
+      .then(result => sendResponse(result))
+      .catch(error => sendResponse({error: error.toString()}));
+    return true; // Required for async sendResponse
+  }
+});
 
-  return {
-    length: url.length,
-    hostnameLength: a.hostname.length,
-    pathLength: a.pathname.length,
-    hasIPAddress: /^\d{1,3}(\\.\\d{1,3}){3}$/.test(a.hostname),
-    numSpecialChars: (url.match(/[-_.~!$&'()*+,;=:@]/g) || []).length
-  };
+// Helper function to check URLs (can be used by popup.js as well)
+async function fetchPrediction(url) {
+  try {
+    const response = await fetch('http://localhost:5000/predict', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ url: url })
+    });
+    
+    return await response.json();
+  } catch (error) {
+    throw new Error(`Failed to check URL: ${error.message}`);
+  }
 }

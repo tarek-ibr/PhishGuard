@@ -1,27 +1,30 @@
 {
   "manifest_version": 3,
-  "name": "Phishing + Fake News Detector",
+  "name": "PhishGuard",
   "version": "1.0",
-  "description": "Detect phishing URLs and fake news.",
+  "description": "Detect phishing websites using machine learning",
   "icons": {
     "16": "img/icon16.jpg",
     "48": "img/icon48.jpg",
     "128": "img/icon128.jpg"
   },
   "permissions": [
-    "webRequest",
-    "webRequestBlocking",
+    "webNavigation",
     "tabs",
     "scripting"
   ],
   "host_permissions": [
-    "<all_urls>",
-    "http://localhost:5000/"
+    "<all_urls>"
   ],
   "background": {
     "service_worker": "background.js"
   },
   "action": {
-    "default_popup": "popup.html"
-  }
+    "default_popup": "popup.html",
+    "default_title": "PhishGuard"
+  },
+  "web_accessible_resources": [{
+    "resources": ["warning.html"],
+    "matches": ["<all_urls>"]
+  }]
 }
