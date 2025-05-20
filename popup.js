@@ -1,34 +1,72 @@
-
 const form = document.getElementById('news-form');
 
-
 form.addEventListener('submit', async (event) => {
-
   event.preventDefault();
-
 
   const input = document.getElementById('news-text').value;
 
   try {
-
     const response = await fetch('http://localhost:5000/predict', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({text: input}),
+      body: JSON.stringify({ url: input })  // sending the URL key instead of text
     });
 
+    const resultDiv = document.getElementById('prediction-result');
 
     if (response.ok) {
+      const data = await response.json();
 
-      const prediction = (await response.json()).prediction;
-      const resultDiv = document.getElementById('prediction-result');
-      resultDiv.innerText = prediction === 0 ? 'The news is Real' : 'The news is Fake';
+      if (data.prediction !== undefined) {
+        resultDiv.innerText = data.prediction === 0
+          ? '✅ This URL is Safe'
+          : '🚨 This URL is Phishing';
+      } else {
+        resultDiv.innerText = '⚠️ Error: ' + (data.error || 'Unexpected response format');
+      }
     } else {
-      console.error('Request failed:', response.status);
+      resultDiv.innerText = '⚠️ Server returned error: ' + response.status;
     }
   } catch (error) {
-    console.error('Request failed:', error);
+    const resultDiv = document.getElementById('prediction-result');
+    resultDiv.innerText = '⚠️ Request failed: ' + error.message;
+  }
+});
+const form = document.getElementById('news-form');
+
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+
+  const input = document.getElementById('news-text').value;
+
+  try {
+    const response = await fetch('http://localhost:5000/predict', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ url: input })  // sending the URL key instead of text
+    });
+
+    const resultDiv = document.getElementById('prediction-result');
+
+    if (response.ok) {
+      const data = await response.json();
+
+      if (data.prediction !== undefined) {
+        resultDiv.innerText = data.prediction === 0
+          ? '✅ This URL is Safe'
+          : '🚨 This URL is Phishing';
+      } else {
+        resultDiv.innerText = '⚠️ Error: ' + (data.error || 'Unexpected response format');
+      }
+    } else {
+      resultDiv.innerText = '⚠️ Server returned error: ' + response.status;
+    }
+  } catch (error) {
+    const resultDiv = document.getElementById('prediction-result');
+    resultDiv.innerText = '⚠️ Request failed: ' + error.message;
   }
 });

@@ -1,17 +1,19 @@
-from flask import Flask, request, jsonify
-import pickle
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
+import pickle
+import pandas as pd
+from features import extract_all_features_df  # ← Import your function
 
 app = Flask(__name__)
 CORS(app)
 
-# Load ML model and vectorizer
+# Load your ML model
 with open('model.pkl', 'rb') as f:
     model = pickle.load(f)
 
-with open('vector.pkl', 'rb') as f:
-    vectorizer = pickle.load(f)
-
+@app.route('/')
+def home():
+    return render_template('index.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -20,28 +22,17 @@ def predict():
     if not data:
         return jsonify({'error': 'No JSON received'}), 400
 
-    # Case 1: text input (for fake news)
-    if 'text' in data:
-        text = data['text']
-        text_transformed = vectorizer.transform([text])
-        prediction = model.predict(text_transformed)[0]
-        return jsonify({'prediction': int(prediction)})
+    # Case: phishing detection by URL
+    if 'url' in data:
+        url = data['url']
+        try:
+            features_df = extract_all_features_df(url)
+            prediction = model.predict(features_df)[0]
+            return jsonify({'prediction': int(prediction)})
+        except Exception as e:
+            return jsonify({'error': str(e)}), 500
 
-    # Case 2: URL features (for phishing detection)
-    elif 'features' in data:
-        features = data['features']
-        feature_array = [
-            features.get('length', 0),
-            features.get('hostnameLength', 0),
-            features.get('pathLength', 0),
-            int(features.get('hasIPAddress', False)),
-            features.get('numSpecialChars', 0)
-        ]
-        prediction = model.predict([feature_array])[0]
-        return jsonify({'prediction': int(prediction)})
-
-    return jsonify({'error': 'Missing expected keys'}), 400
-
+    return jsonify({'error': 'Missing \"url\" key in request'}), 400
 
 if __name__ == '__main__':
     app.run(debug=True)
