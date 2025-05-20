@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 import pickle
 import pandas as pd
-from features import extract_all_features_df  # ← Import your function
+from features import extract_all_features_df
 
 app = Flask(__name__)
 CORS(app)
