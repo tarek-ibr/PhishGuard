@@ -66,7 +66,7 @@
       background-color: #f1f1f1;
       padding: 12px;
       border-radius: 5px;
-      word-break: break-all;
+      word-break: break-word;
       margin: 20px 0;
       font-family: monospace;
       text-align: left;
@@ -88,22 +88,41 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Get the destination URL from the query parameter
       const urlParams = new URLSearchParams(window.location.search);
       const destination = urlParams.get('destination');
-      
-      // Display the suspicious URL
-      document.getElementById('suspicious-url').textContent = destination || 'Unknown URL';
-      
-      // Set up button actions
+      const urlDisplay = document.getElementById('suspicious-url');
+      const proceedBtn = document.getElementById('proceed-anyway');
+
+      // Default values
+      urlDisplay.textContent = 'Unknown URL';
+      proceedBtn.disabled = true;
+
+      if (destination) {
+        try {
+          // Try to construct a valid URL
+          const validUrl = new URL(destination);
+
+          // If successful, display it and enable proceed
+          urlDisplay.textContent = validUrl.href;
+          proceedBtn.disabled = false;
+
+          // Bind actions
+          document.getElementById('proceed-anyway').addEventListener('click', function() {
+            window.location.href = validUrl.href;
+          });
+
+        } catch (e) {
+          // Malformed URL — do not allow proceeding
+          urlDisplay.textContent = '⚠️ Invalid or unsafe URL';
+          proceedBtn.disabled = true;
+        }
+      }
+
+      // Go back safely
       document.getElementById('go-back').addEventListener('click', function() {
         window.history.back();
-      });
-      
-      document.getElementById('proceed-anyway').addEventListener('click', function() {
-        window.location.href = destination;
       });
     });
   </script>
 </body>
-</html> 
+</html>
