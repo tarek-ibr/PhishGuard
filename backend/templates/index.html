@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Fake News & Phishing Detector</title>
+</head>
+<body>
+  <h1>Fake News Detector</h1>
+  <form id="news-form">
+    <textarea id="news-text" rows="5" cols="50" placeholder="Paste your news text here..."></textarea><br><br>
+    <button type="submit">Check</button>
+  </form>
+  <div id="result"></div>
+
+  <script>
+    const form = document.getElementById('news-form');
+    const resultDiv = document.getElementById('result');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const text = document.getElementById('news-text').value;
+
+      try {
+        const response = await fetch('/predict', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ text: text })
+        });
+
+        const data = await response.json();
+        if (data.prediction !== undefined) {
+          resultDiv.textContent = data.prediction === 0 ? '✅ Real News' : '❌ Fake News';
+        } else {
+          resultDiv.textContent = '⚠️ Error: ' + (data.error || 'Unexpected response');
+        }
+      } catch (error) {
+        resultDiv.textContent = '⚠️ Request failed: ' + error;
+      }
+    });
+  </script>
+</body>
+</html>

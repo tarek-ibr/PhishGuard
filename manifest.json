@@ -1,0 +1,27 @@
+{
+  "manifest_version": 3,
+  "name": "Phishing + Fake News Detector",
+  "version": "1.0",
+  "description": "Detect phishing URLs and fake news.",
+  "icons": {
+    "16": "img/icon16.jpg",
+    "48": "img/icon48.jpg",
+    "128": "img/icon128.jpg"
+  },
+  "permissions": [
+    "webRequest",
+    "webRequestBlocking",
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>",
+    "http://localhost:5000/"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  }
+}
