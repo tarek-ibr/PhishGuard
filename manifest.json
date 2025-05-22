@@ -4,9 +4,9 @@
   "version": "1.0",
   "description": "Detect phishing websites using machine learning",
   "icons": {
-    "16": "img/icon16.jpg",
-    "48": "img/icon48.jpg",
-    "128": "img/icon128.jpg"
+    "16": "img/photo.png",
+    "48": "img/photo.png",
+    "128": "img/photo.png"
   },
   "permissions": [
     "webNavigation",
