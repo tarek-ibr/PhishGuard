@@ -9,17 +9,14 @@ from features import extract_all_features_df
 app = Flask(__name__)
 CORS(app)
 
-# Load the bundled model with scaler and feature names
 print("Loading model bundle...")
-bundle = joblib.load('phishing_model_bundle.pkl')
-model_bytes = bundle['model_bytes']
+bundle = joblib.load('./backend/phishing_model_bundle.pkl')
+
+# model = tf.keras.models.load_model('./backend/phishing_model.keras')
+model = tf.keras.models.load_model('./backend/phishing_model.keras')
+
 scaler = bundle['scaler']
 feature_names = bundle['feature_names']
-
-# Reconstruct the model from saved bytes
-with open('temp_model.keras', 'wb') as f:
-    f.write(model_bytes)
-model = tf.keras.models.load_model('temp_model.keras')
 
 print("Model loaded successfully")
 
@@ -44,17 +41,21 @@ def predict():
         url = data['url']
         try:
             # Extract features
-            features_df = extract_all_features_df(url)
+            newDF = extract_all_features_df("https://www.boxanalitika.ru")
+            features_df = newDF[feature_names]
 
-            # Ensure the features match the expected feature names
-            features_df = features_df[feature_names]
+            cols_to_transform = ['URLLength', 'DomainLength', 'TLDLength', 'NoOfObfuscatedChar', 'ObfuscationRatio',
+                                 'DegitRatioInURL', 'NoOfEqualsInURL', 'NoOfQMarkInURL', 'NoOfAmpersandInURL',
+                                 'SpacialCharRatioInURL']
 
-            # Apply the scaler
+            # Step 5: Apply log1p transformation
+            features_df[cols_to_transform] = features_df[cols_to_transform].apply(lambda col: np.log1p(col))
+
             scaled_features = scaler.transform(features_df)
 
             # Make prediction
             prediction = model.predict(scaled_features)
-            prediction = int(np.round(prediction[0][0]))  # Convert to binary prediction
+            prediction = (prediction > 0.5).astype(int)
 
             return jsonify({'prediction': prediction})
         except Exception as e:
