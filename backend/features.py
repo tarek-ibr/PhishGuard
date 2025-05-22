@@ -29,48 +29,58 @@ def extract_all_features_df(url):
     domain = parsed.netloc
     features = {}
 
-    # Basic structure
     features['URLLength'] = len(url)
     features['DomainLength'] = len(domain)
     features['IsDomainIP'] = int(bool(re.match(r'\d+\.\d+\.\d+\.\d+', domain)))
 
-    # TLD-related features
+    features['CharContinuationRate'] = len(re.findall(r'(.)\1{2,}', url)) / len(url) if len(url) > 0 else 0
+
     features['TLD'] = domain.split('.')[-1] if '.' in domain else ''
-    features['TLDLength'] = len(features['TLD'])
+
     tld = features['TLD'].lower()
+
     features['TLDLegitimateProb'] = TLD_PROBABILITY_MAP.get(tld, 0.5)  # Default 0.5 if unknown
 
-    # Repetition/obfuscation
-    features['CharContinuationRate'] = len(re.findall(r'(.)\1{2,}', url)) / len(url) if len(url) > 0 else 0
-    features['HasObfuscation'] = int('//' in url or '\\' in url)
-    features['NoOfObfuscatedChar'] = url.count('//') + url.count('\\')
-    features['ObfuscationRatio'] = features['NoOfObfuscatedChar'] / len(url) if len(url) > 0 else 0
-
-    # Character ratios
-    features['LetterRatioInURL'] = sum(c.isalpha() for c in url) / len(url) if len(url) > 0 else 0
-    features['DegitRatioInURL'] = sum(c.isdigit() for c in url) / len(url) if len(url) > 0 else 0
-
-    # Special characters
-    features['NoOfEqualsInURL'] = url.count('=')
-    features['NoOfQMarkInURL'] = url.count('?')
-    features['NoOfAmpersandInURL'] = url.count('&')
-    special_chars = re.findall(r'[^A-Za-z0-9]', url)
-    features['SpacialCharRatioInURL'] = len(special_chars) / len(url) if len(url) > 0 else 0
-
-    # Character distribution
     char_counts = Counter(url)
     total_chars = sum(char_counts.values())
     char_probs = [count / total_chars for count in char_counts.values()]
+
     features['URLCharProb'] = np.mean(char_probs)
 
-    # Protocol
+    features['TLDLength'] = len(features['TLD'])
+
+    features['HasObfuscation'] = int('//' in url or '\\' in url)
+
+    features['NoOfObfuscatedChar'] = url.count('//') + url.count('\\')
+
+    features['ObfuscationRatio'] = features['NoOfObfuscatedChar'] / len(url) if len(url) > 0 else 0
+
+    features['LetterRatioInURL'] = sum(c.isalpha() for c in url) / len(url) if len(url) > 0 else 0
+
+    features['DegitRatioInURL'] = sum(c.isdigit() for c in url) / len(url) if len(url) > 0 else 0
+
+    features['NoOfEqualsInURL'] = url.count('=')
+
+    features['NoOfQMarkInURL'] = url.count('?')
+
+    features['NoOfAmpersandInURL'] = url.count('&')
+
+    special_chars = re.findall(r'[^A-Za-z0-9]', url)
+
+    features['SpacialCharRatioInURL'] = len(special_chars) / len(url) if len(url) > 0 else 0
+
     features['IsHTTPS'] = int(parsed.scheme == 'https')
+
+
 
     # Keyword flags
     lower_url = url.lower()
     features['Bank'] = int('bank' in lower_url)
     features['Pay'] = int('pay' in lower_url)
     features['Crypto'] = int('crypto' in lower_url)
+
+
+
 
     # Drop helper keys
     features.pop('TLD')  # Remove intermediate 'TLD' column if not used in your model
