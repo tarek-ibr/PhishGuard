@@ -10,10 +10,9 @@ app = Flask(__name__)
 CORS(app)
 
 print("Loading model bundle...")
-bundle = joblib.load('./backend/phishing_model_bundle.pkl')
+bundle = joblib.load('phishing_model_bundle.pkl')
 
-# model = tf.keras.models.load_model('./backend/phishing_model.keras')
-model = tf.keras.models.load_model('./backend/phishing_model.keras')
+model = tf.keras.models.load_model('phishing_model.keras')
 
 scaler = bundle['scaler']
 feature_names = bundle['feature_names']
@@ -57,9 +56,12 @@ def predict():
             prediction = model.predict(scaled_features)
             prediction = (prediction > 0.5).astype(int)
 
+            print(prediction)
+            print(type(prediction))
+
             return jsonify({'prediction': prediction})
         except Exception as e:
-            return jsonify({'error': str(e)}), 500
+            return jsonify({'Error': str(e)}), 500
 
     return jsonify({'error': 'Missing \"url\" key in request'}), 400
 
