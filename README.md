@@ -14,14 +14,9 @@ This chrome extention uses machine learning to detect phishing websites based on
 4.	If phishing is detected → Redirect to warning page
 5.	User chooses to proceed or go back safely
 
-### System Components:
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Web Browser   │    │  Chrome Ext.    │    │  Flask Backend  │
-│                 │◄──►│                 │◄──►│                 │
-│  - Navigation   │    │  - Background   │    │  - ML Model     │
-│  - Tab Mgmt     │    │  - Popup UI     │    │  - Feature Ext. │
-│                 │    │  - Warning UI   │    │  - Prediction   │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
+### Architecture
+PhishGuard follows a three-tier architecture comprising the browser extension frontend, local API backend, and trained ML model.
+
 
 
 ### Dataset Information:
