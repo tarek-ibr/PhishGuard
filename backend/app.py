@@ -40,7 +40,7 @@ def predict():
         url = data['url']
         try:
             # Extract features
-            newDF = extract_all_features_df("https://www.boxanalitika.ru")
+            newDF = extract_all_features_df(url)
             features_df = newDF[feature_names]
 
             cols_to_transform = ['URLLength', 'DomainLength', 'TLDLength', 'NoOfObfuscatedChar', 'ObfuscationRatio',
@@ -56,8 +56,10 @@ def predict():
             prediction = model.predict(scaled_features)
             prediction = (prediction > 0.5).astype(int)
 
+            prediction = prediction.tolist()
+            prediction = prediction[0][0]
+
             print(prediction)
-            print(type(prediction))
 
             return jsonify({'prediction': prediction})
         except Exception as e:

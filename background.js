@@ -23,7 +23,7 @@ chrome.webNavigation.onBeforeNavigate.addListener(
       }
 
       const data = await response.json();
-      const isPhishing = data.prediction === 1;
+      const isPhishing = data.prediction === 0;
 
       if (isPhishing) {
         // Show warning and ask user if they want to proceed

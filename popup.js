@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
           
           if (response.prediction !== undefined) {
-            resultDiv.innerText = response.prediction === 0
+            resultDiv.innerText = response.prediction === 1
               ? '✅ This URL is Safe'
               : '🚨 This URL is Phishing';
           } else {
@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
       
       const data = await response.json();
       if (data.prediction !== undefined) {
-        resultDiv.innerText = data.prediction === 0
+        resultDiv.innerText = data.prediction === 1
           ? '✅ This URL is Safe'
           : '🚨 This URL is Phishing';
       } else {
