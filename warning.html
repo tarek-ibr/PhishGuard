@@ -42,6 +42,7 @@
       justify-content: center;
       gap: 20px;
       margin-top: 30px;
+      flex-wrap: wrap;
     }
     button {
       padding: 12px 24px;
@@ -50,6 +51,7 @@
       font-size: 16px;
       cursor: pointer;
       transition: background-color 0.3s;
+      min-width: 150px;
     }
     .back-btn {
       background-color: #4caf50;
@@ -59,7 +61,11 @@
       background-color: #d32f2f;
       color: white;
     }
-    button:hover {
+    .proceed-btn:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+    button:hover:not(:disabled) {
       opacity: 0.9;
     }
     .url-display {
@@ -70,6 +76,12 @@
       margin: 20px 0;
       font-family: monospace;
       text-align: left;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+    .status-message {
+      font-weight: bold;
+      margin: 10px 0;
     }
   </style>
 </head>
@@ -78,11 +90,12 @@
     <img src="img/photo.png" alt="Warning" class="warning-icon">
     <h1>⚠️ Phishing Alert! ⚠️</h1>
     <p>PhishGuard has detected that this website may be a phishing attempt.</p>
-    <div class="url-display" id="suspicious-url"></div>
+    <div class="url-display" id="suspicious-url">Loading...</div>
+    <div class="status-message" id="status-message"></div>
     <p>This site might be trying to steal your personal information, login credentials, or financial details.</p>
     <div class="buttons">
       <button class="back-btn" id="go-back">Go Back (Safe)</button>
-      <button class="proceed-btn" id="proceed-anyway">Proceed Anyway (Risky)</button>
+      <button class="proceed-btn" id="proceed-anyway" disabled>Proceed Anyway (Risky)</button>
     </div>
   </div>
 
@@ -92,6 +105,10 @@
       const destination = urlParams.get('destination');
       const urlDisplay = document.getElementById('suspicious-url');
       const proceedBtn = document.getElementById('proceed-anyway');
+      const goBackBtn = document.getElementById('go-back');
+      const statusMessage = document.getElementById('status-message');
+
+      console.log('Warning page loaded, destination:', destination);
 
       // Default values
       urlDisplay.textContent = 'Unknown URL';
@@ -99,28 +116,66 @@
 
       if (destination) {
         try {
-          // Try to construct a valid URL
-          const validUrl = new URL(destination);
+          // Decode the URL
+          const decodedUrl = decodeURIComponent(destination);
+          console.log('Decoded URL:', decodedUrl);
+          
+          // Try to construct a valid URL object for validation
+          const validUrl = new URL(decodedUrl);
+          console.log('Valid URL object created:', validUrl.href);
 
-          // If successful, display it and enable proceed
+          // Display the URL
           urlDisplay.textContent = validUrl.href;
+          statusMessage.textContent = 'URL validation: ✅ Valid URL format';
+          statusMessage.style.color = '#2e7d32';
+          
+          // Enable proceed button
           proceedBtn.disabled = false;
 
-          // Bind actions
-          document.getElementById('proceed-anyway').addEventListener('click', function() {
+          // Bind proceed action
+          proceedBtn.addEventListener('click', function() {
+            console.log('Proceeding to:', validUrl.href);
+            statusMessage.textContent = 'Redirecting to potentially unsafe site...';
+            statusMessage.style.color = '#d32f2f';
+            // Use window.location.href for better compatibility
             window.location.href = validUrl.href;
           });
 
         } catch (e) {
+          console.error('URL validation error:', e);
           // Malformed URL — do not allow proceeding
-          urlDisplay.textContent = '⚠️ Invalid or unsafe URL';
+          urlDisplay.textContent = '⚠️ Invalid or unsafe URL: ' + (destination || 'null');
+          statusMessage.textContent = 'URL validation: ❌ Invalid URL format';
+          statusMessage.style.color = '#d32f2f';
           proceedBtn.disabled = true;
         }
+      } else {
+        console.warn('No destination URL provided');
+        urlDisplay.textContent = '⚠️ No URL provided';
+        statusMessage.textContent = 'Error: No destination URL specified';
+        statusMessage.style.color = '#d32f2f';
+        proceedBtn.disabled = true;
       }
 
-      // Go back safely
-      document.getElementById('go-back').addEventListener('click', function() {
-        window.history.back();
+      // Go back safely - multiple fallback methods
+      goBackBtn.addEventListener('click', function() {
+        console.log('Going back safely');
+        statusMessage.textContent = 'Going back to safety...';
+        statusMessage.style.color = '#2e7d32';
+        
+        try {
+          // Try to go back in history
+          if (window.history.length > 1) {
+            window.history.back();
+          } else {
+            // If no history, go to a safe page
+            window.location.href = 'https://www.google.com';
+          }
+        } catch (e) {
+          console.error('Error going back:', e);
+          // Fallback to safe page
+          window.location.href = 'https://www.google.com';
+        }
       });
     });
   </script>
