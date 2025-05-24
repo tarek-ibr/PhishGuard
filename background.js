@@ -1,7 +1,14 @@
 // background.js
 
 chrome.webNavigation.onBeforeNavigate.addListener(async function (details) {
-  const url = details.url;
+
+  const { tabId, url } = details;
+
+  /* 0️⃣ Skip if the user has already allowed this URL in this tab */
+  if (bypassMap.has(tabId) && bypassMap.get(tabId).has(url)) {
+    console.log('User-approved navigation, skipping phishing check:', url);
+    return;
+  }
 
   // Skip internal/local URLs
   if (
@@ -47,14 +54,26 @@ chrome.webNavigation.onBeforeNavigate.addListener(async function (details) {
 });
 
 // Message listener for popup.js or warning.html
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.action === "checkUrl") {
-    fetchPrediction(message.url)
-      .then(result => sendResponse(result))
-      .catch(error => sendResponse({ error: error.message }));
-    return true; // Keep message channel open for async response
+// background.js  (top-level)
+const bypassMap = new Map();  // tabId → Set<String> of URLs (or domains)
+
+/*  Exchange messages with warning.html
+----------------------------------------------------*/
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  if (msg.action === 'bypassUrl' && sender.tab) {
+    const { id: tabId } = sender.tab;
+    if (!bypassMap.has(tabId)) bypassMap.set(tabId, new Set());
+    bypassMap.get(tabId).add(msg.url);
+    console.log(`✅ User bypassed for ${msg.url} in tab ${tabId}`);
+    sendResponse({ ok: true });
+    return;               // no async work, keep channel closed
   }
 });
+
+chrome.tabs.onRemoved.addListener((tabId) => {
+  bypassMap.delete(tabId);
+});
+
 
 // Reusable function to fetch prediction
 async function fetchPrediction(url) {

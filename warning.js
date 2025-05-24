@@ -25,12 +25,15 @@ document.addEventListener('DOMContentLoaded', function () {
       statusMessage.style.color = '#2e7d32';
       proceedBtn.disabled = false;
 
-      proceedBtn.addEventListener('click', function () {
-        console.log('Proceeding to:', validUrl.href);
-        statusMessage.textContent = 'Redirecting to potentially unsafe site...';
-        statusMessage.style.color = '#d32f2f';
+      proceedBtn.addEventListener('click', async () => {
+        try {
+          await chrome.runtime.sendMessage({ action: 'bypassUrl', url: validUrl.href });
+        } catch (e) {
+          console.warn('Could not register bypass, proceeding anyway', e);
+        }
         window.location.href = validUrl.href;
       });
+
 
     } catch (e) {
       console.error('URL validation error:', e);
