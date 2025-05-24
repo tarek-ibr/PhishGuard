@@ -39,8 +39,29 @@ def predict():
     if 'url' in data:
         url = data['url']
         try:
+
+            from urllib.parse import urlparse, urlunparse
+
+            # 1️⃣  Make sure we have a scheme so that urlparse works reliably.
+            if not url.lower().startswith(("http://", "https://")):
+                url = "http://" + url
+
+            # 2️⃣  Parse the URL.
+            p = urlparse(url)
+
+            # 3️⃣  If the netloc is empty (e.g. user passed just “example.com/foo”)
+            #     urlparse puts everything in `path`, so fix that.
+            netloc = p.netloc or p.path.split("/")[0]
+
+            # 4️⃣  Add “www.” if missing.
+            if not netloc.startswith("www."):
+                netloc = "www." + netloc
+
+            # 5️⃣  Re-assemble, blanking out path/params/query/fragment.
+            cleaned = urlunparse((p.scheme, netloc, "", "", "", ""))
+
             # Extract features
-            newDF = extract_all_features_df(url)
+            newDF = extract_all_features_df(cleaned)
             features_df = newDF[feature_names]
 
             cols_to_transform = ['URLLength', 'DomainLength', 'TLDLength', 'NoOfObfuscatedChar', 'ObfuscationRatio',
